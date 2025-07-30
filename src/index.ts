@@ -56,6 +56,7 @@ const COUNCIL_MEMBERS: CouncilMember[] = [
 ];
 
 const tool = {
+  id: 'council',
   name: 'council',
   description: 'Summon a council of personalities to discuss topics with audio output',
   version: '1.0.0',
