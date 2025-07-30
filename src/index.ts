@@ -1,4 +1,13 @@
-import { createTool, ToolContext } from '@clanker/core';
+// Tool definition for Clanker registry
+interface ToolContext {
+  args: Record<string, any>;
+  output: {
+    startSection(title: string): void;
+    write(message: string): void;
+    success(message: string): void;
+  };
+  executeSubtool(toolName: string, args: Record<string, any>): Promise<any>;
+}
 
 interface CouncilMember {
   name: string;
@@ -46,7 +55,7 @@ const COUNCIL_MEMBERS: CouncilMember[] = [
   }
 ];
 
-export default createTool({
+const tool = {
   name: 'council',
   description: 'Summon a council of personalities to discuss topics with audio output',
   version: '1.0.0',
@@ -150,7 +159,9 @@ export default createTool({
     
     output.success('Council session completed successfully!');
   }
-});
+};
+
+export default tool;
 
 function generateOpeningStatement(member: CouncilMember, topic: string): string {
   const statements: { [key: string]: string } = {
