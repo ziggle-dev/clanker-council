@@ -1,6 +1,6 @@
 {
   "name": "clanker-council",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A Clanker tool that summons a council of personalities for audio discussions",
   "main": "dist/index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "typescript": "^5.0.0"
   },
   "clanker": {
-    "version": "1.0.1",
+    "version": "1.1.0",
     "category": "Utility",
     "capabilities": ["SystemExecute"],
     "dependencies": ["elevenlabs-tts"]

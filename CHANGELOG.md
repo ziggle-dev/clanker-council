@@ -5,6 +5,25 @@ All notable changes to the Clanker Council tool will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-07-30
+
+### Changed
+- **BREAKING**: Migrated to Clanker builder pattern using createTool()
+- Updated tool to match the standard Clanker tool format
+- Improved ElevenLabs TTS integration to use proper action/voice parameters
+- Added voice mapping for council members to ElevenLabs voices
+- Enhanced return value with structured data
+
+### Fixed
+- Tool now properly exports using the expected format
+- Arguments are correctly received from Clanker
+- Tool is now discoverable and executable by Clanker CLI
+
+### Technical
+- Uses @ziggler/clanker createTool() builder pattern
+- Added proper examples for tool usage
+- Returns success status and structured data
+
 ## [1.0.1] - 2025-07-30
 
 ### Fixed

@@ -1,3 +1,37 @@
+// Tool builder implementation without external dependencies
+const createTool = () => {
+  const tool: any = {
+    args: {},
+    examples: []
+  };
+  
+  const builder = {
+    id: (id: string) => { tool.id = id; return builder; },
+    name: (name: string) => { tool.name = name; return builder; },
+    description: (desc: string) => { tool.description = desc; return builder; },
+    category: (cat: any) => { tool.category = 'Utility'; return builder; },
+    capabilities: (...caps: any[]) => { tool.capabilities = ['SystemExecute']; return builder; },
+    tags: (...tags: string[]) => { tool.tags = tags; return builder; },
+    stringArg: (name: string, desc: string, opts: any) => {
+      tool.args[name] = { type: 'string', description: desc, ...opts };
+      return builder;
+    },
+    numberArg: (name: string, desc: string, opts: any) => {
+      tool.args[name] = { type: 'number', description: desc, ...opts };
+      return builder;
+    },
+    booleanArg: (name: string, desc: string, opts: any) => {
+      tool.args[name] = { type: 'boolean', description: desc, ...opts };
+      return builder;
+    },
+    examples: (exs: any[]) => { tool.examples = exs; return builder; },
+    execute: (fn: any) => { tool.execute = fn; return builder; },
+    build: () => tool
+  };
+  
+  return builder;
+};
+
 interface CouncilMember {
   name: string;
   personality: string;
@@ -44,51 +78,45 @@ const COUNCIL_MEMBERS: CouncilMember[] = [
   }
 ];
 
-export default {
-  id: 'council',
-  name: 'council',
-  description: 'Summon a council of personalities to discuss topics with audio output',
-  version: '1.0.0',
-  author: 'Clanker Community',
-  category: 'Utility',
-  capabilities: ['SystemExecute'],
-  
-  args: {
-    topic: {
-      type: 'string',
-      description: 'The topic for the council to discuss',
-      required: true
+const councilTool = createTool()
+  .id('council')
+  .name('Council')
+  .description('Summon a council of personalities to discuss topics with audio output')
+  .category('Utility')
+  .capabilities('SystemExecute')
+  .tags('council', 'discussion', 'debate', 'tts', 'audio')
+  .stringArg('topic', 'The topic for the council to discuss', { required: true })
+  .numberArg('members', 'Number of council members (2-6)', { required: false, default: 4 })
+  .numberArg('rounds', 'Number of discussion rounds', { required: false, default: 3 })
+  .booleanArg('voice', 'Enable voice output via ElevenLabs TTS', { required: false, default: true })
+  .examples([
+    {
+      description: 'Discuss AI ethics with 4 members',
+      arguments: {
+        topic: 'Should AI have emotions?',
+        members: 4,
+        rounds: 3,
+        voice: true
+      },
+      result: 'Council discussion completed with 4 members over 3 rounds'
     },
-    members: {
-      type: 'number',
-      description: 'Number of council members (2-6)',
-      default: 4
-    },
-    rounds: {
-      type: 'number',
-      description: 'Number of discussion rounds',
-      default: 3
-    },
-    voice: {
-      type: 'boolean',
-      description: 'Enable voice output via ElevenLabs TTS',
-      default: true
+    {
+      description: 'Quick debate without voice',
+      arguments: {
+        topic: 'Remote work vs office work',
+        members: 3,
+        rounds: 2,
+        voice: false
+      },
+      result: 'Council discussion completed with 3 members over 2 rounds'
     }
-  },
-  
-  async execute(context: any) {
-    const { args, output, executeSubtool } = context;
+  ])
+  .execute(async (args: any, context: any) => {
+    const { output, executeSubtool } = context;
+    const { topic, members = 4, rounds = 3, voice = true } = args;
     
-    // Ensure args exists and has the required properties
-    if (!args || !args.topic) {
-      output.write('Error: Topic is required for council discussion');
-      return;
-    }
-    
-    const topic = args.topic;
-    const memberCount = Math.min(Math.max(args.members || 4, 2), 6);
-    const rounds = args.rounds || 3;
-    const enableVoice = args.voice !== false;
+    const memberCount = Math.min(Math.max(members, 2), 6);
+    const enableVoice = voice;
     
     output.startSection('Council Session');
     output.write(`Topic: "${topic}"`);
@@ -115,10 +143,12 @@ export default {
       if (enableVoice) {
         try {
           const member = selectedMembers.find(m => m.name === speaker);
-          await executeSubtool('elevenlabs-tts', {
+          const voiceName = getVoiceMapping(member?.voice || 'default');
+          
+          await executeSubtool('elevenlabs_tts', {
+            action: 'speak',
             text: message,
-            voice: member?.voice || 'default',
-            output: `council-${speaker.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.mp3`
+            voice: voiceName
           });
         } catch (error) {
           output.write(`[Voice output failed: ${error instanceof Error ? error.message : 'Unknown error'}]`);
@@ -154,9 +184,33 @@ export default {
     const consensus = generateConsensus(topic, conversation, selectedMembers);
     await speak('Moderator', consensus);
     
-    output.success('Council session completed successfully!');
-  }
-};
+    return {
+      success: true,
+      output: 'Council session completed successfully!',
+      data: {
+        topic,
+        members: memberCount,
+        rounds,
+        conversation: conversation.length
+      }
+    };
+  })
+  .build();
+
+export default councilTool;
+
+function getVoiceMapping(voice: string): string {
+  const voiceMap: { [key: string]: string } = {
+    'mature': 'James',
+    'confident': 'Josh',
+    'energetic': 'Adam',
+    'calm': 'Daniel',
+    'soothing': 'Emily',
+    'bold': 'Patrick',
+    'default': 'Clanker'
+  };
+  return voiceMap[voice] || 'Clanker';
+}
 
 function generateOpeningStatement(member: CouncilMember, topic: string): string {
   const statements: { [key: string]: string } = {
