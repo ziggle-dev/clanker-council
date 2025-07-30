@@ -1,14 +1,3 @@
-// Tool definition for Clanker registry
-interface ToolContext {
-  args: Record<string, any>;
-  output: {
-    startSection(title: string): void;
-    write(message: string): void;
-    success(message: string): void;
-  };
-  executeSubtool(toolName: string, args: Record<string, any>): Promise<any>;
-}
-
 interface CouncilMember {
   name: string;
   personality: string;
@@ -55,7 +44,7 @@ const COUNCIL_MEMBERS: CouncilMember[] = [
   }
 ];
 
-const tool = {
+export default {
   id: 'council',
   name: 'council',
   description: 'Summon a council of personalities to discuss topics with audio output',
@@ -87,11 +76,18 @@ const tool = {
     }
   },
   
-  async execute(context: ToolContext) {
+  async execute(context: any) {
     const { args, output, executeSubtool } = context;
-    const topic = args.topic as string;
-    const memberCount = Math.min(Math.max(args.members as number || 4, 2), 6);
-    const rounds = args.rounds as number || 3;
+    
+    // Ensure args exists and has the required properties
+    if (!args || !args.topic) {
+      output.write('Error: Topic is required for council discussion');
+      return;
+    }
+    
+    const topic = args.topic;
+    const memberCount = Math.min(Math.max(args.members || 4, 2), 6);
+    const rounds = args.rounds || 3;
     const enableVoice = args.voice !== false;
     
     output.startSection('Council Session');
@@ -161,8 +157,6 @@ const tool = {
     output.success('Council session completed successfully!');
   }
 };
-
-export default tool;
 
 function generateOpeningStatement(member: CouncilMember, topic: string): string {
   const statements: { [key: string]: string } = {
