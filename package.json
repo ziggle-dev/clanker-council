@@ -1,0 +1,34 @@
+{
+  "name": "clanker-council",
+  "version": "1.0.0",
+  "description": "A Clanker tool that summons a council of personalities for audio discussions",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "node dist/index.js"
+  },
+  "keywords": [
+    "clanker",
+    "council",
+    "discussion",
+    "tts",
+    "elevenlabs",
+    "audio"
+  ],
+  "author": "Clanker Community",
+  "license": "MIT",
+  "dependencies": {
+    "@clanker/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "clanker": {
+    "version": "1.0.0",
+    "category": "Utility",
+    "capabilities": ["SystemExecute"],
+    "dependencies": ["elevenlabs-tts"]
+  }
+}
